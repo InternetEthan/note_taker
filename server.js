@@ -24,7 +24,15 @@ app.post('/api/notes', (req, res) => {
     notes.push(newNote);
     fs.writeFileSync('./db/db.json', JSON.stringify(notes));
     res.json(notes);
+});
+
+app.delete('/api/notes/:id', (req, res) => {
+    const id = req.params.id;
+    notes.splice(id, 1);
+    fs.writeFileSync('./db/db.json', JSON.stringify(notes));
+    res.json(notes);
 })
+
 
 // Serve static files from the public directory
 app.use(express.static(path.join(__dirname, 'public')));
