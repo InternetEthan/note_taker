@@ -1,14 +1,19 @@
 // Import required modules
-const express = require('express'); // Import the Express framework
-const app = express(); // Create an instance of the Express application
-const path = require('path'); // Import the path module for working with file and directory paths
-const fs = require('fs'); // Import the fs module for working with the file system
-const notes = require('./db/db.json'); // Import the db.json file
+const express = require('express');
+const path = require('path');
+const fs = require('fs');
+let notes = require('./db/db.json');
 
+// Create an instance of the Express application
+const app = express();
 
+// Serve static files from the public directory
 app.use(express.static('public'));
+
+// Parse incoming JSON data
 app.use(express.json());
 
+// Get all notes
 app.get('/api/notes', (req, res) => {
     fs.readFile('./db/db.json', 'utf8', (err, data) => {
         if (err) throw err;
@@ -17,6 +22,7 @@ app.get('/api/notes', (req, res) => {
     });
 });
 
+// Create a new note
 
 app.post('/api/notes', (req, res) => {
     const newNote = req.body;
@@ -26,16 +32,13 @@ app.post('/api/notes', (req, res) => {
     res.json(notes);
 });
 
+// Delete a note
 app.delete('/api/notes/:id', (req, res) => {
-    const id = req.params.id;
-    notes.splice(id, 1);
+    let id = req.params.id;
+    notes = notes.filter(note => note.id !== parseInt(id));
     fs.writeFileSync('./db/db.json', JSON.stringify(notes));
     res.json(notes);
-})
-
-
-// Serve static files from the public directory
-app.use(express.static(path.join(__dirname, 'public')));
+});
 
 // Serve index.html at the root URL
 app.get('/', (req, res) => {
@@ -47,8 +50,10 @@ app.get('/notes', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'notes.html'));
 });
 
-// Start the server
-const PORT = process.env.PORT || 3001; // Set the port number for the server
-app.listen(PORT, () => { // Start the server and listen for incoming requests
-    console.log(`Server listening on port ${PORT}`); // Log a message to the console when the server starts
+// Set the port number for the server
+const PORT = process.env.PORT || 3001;
+
+// Start the server and listen for incoming requests
+app.listen(PORT, () => {
+    console.log(`Server listening on port ${PORT}`);
 });
